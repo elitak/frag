@@ -1,0 +1,19 @@
+pristine:b5803c13fb325f4295e3869c58458357e010db7cbb6f104981ad922224de1e59
+[Initial import of frag 1.1
+Don Stewart <dons@galois.com>**20080129194811] 
+hash: 0030052290-4b26471aad7b266c9f46628482b99cd5524ae03c474a286f850fe82fab5ffa33
+[dehaskell98
+gwern0@gmail.com**20080224215754] 
+hash: 0000001116-74ee54626fbe07a9b7573d9cb6e3fa85cbb66563a81fcd0d8a780bf2f6bf1a61
+[modern setup.hs
+Don Stewart <dons@galois.com>**20080622223500] 
+hash: 0000000147-5f654d145722e8cb0a1c08e45d35deda79d89e56567c68247ee76356bb62d6a8
+[Build just the binary (not the library)
+Don Stewart <dons@galois.com>**20080622224249] 
+hash: 0000007479-30ffb017aae21ef6c11a397424e759ee7e12bc1bf467c8c82f0019d4bdede4e4
+[Port to GHC 6.10
+Don Stewart <dons@galois.com>**20081011185622] 
+hash: 0000000327-b29f631821f60ca55e88bcc79109487772cbd2288d69ff323d5c5a09c94b8de0
+[bump to base 4
+Don Stewart <dons@galois.com>**20081011185656] 
+hash: 0000000299-abe68027781ef18c561620b6c392fdaf4a9ca7fc89988db98531ac20e06d3056
