@@ -83,7 +83,13 @@ data-files:          README,
 
 Executable frag
    Main-is:             Main.hs
-   Build-Depends:       base==4.*, GLUT, OpenGL>=2.0, array, random
+   Build-Depends:       base==4.*
+                      , array
+                      , random
+                      , GLUT
+                      , OpenGL >= 2.9.2.0
+                      , OpenGLRaw >= 1.5.0.0
+                      , hashtables
    Hs-source-dirs:      src
    Ghc-options:         -O2 -funbox-strict-fields -fvia-C -optc-O2
    Extensions:          BangPatterns,

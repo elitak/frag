@@ -34,19 +34,19 @@ splitList list = (splitList (drop 16 list))++[(take 16 list)]
 
 
 -- the steps needed to display every font
-genFontList :: ((Float,Float),DisplayList) -> IO()
+genFontList :: ((GLfloat,GLfloat),DisplayList) -> IO()
 genFontList ((cx,cy),list) = do
    defineList list Compile $ do
      unsafeRenderPrimitive Quads $ do
          texCoord (TexCoord2 cx (1-cy-0.0625))
-         vertex   (Vertex2 0 (16 :: Float))
+         vertex   (Vertex2 0 16 :: Vertex2 GLfloat)
          texCoord (TexCoord2 (cx+0.0625) (1-cy-0.0625))
-         vertex   (Vertex2 16 (16 :: Float))
+         vertex   (Vertex2 16 16 :: Vertex2 GLfloat)
          texCoord (TexCoord2 (cx+0.0625) (1-cy-0.001))
-         vertex   (Vertex2 16 (0 :: Float))
+         vertex   (Vertex2 16 0 :: Vertex2 GLfloat)
          texCoord (TexCoord2 cx (1-cy-0.001))
-         vertex   (Vertex2 0 (0 :: Float))
-     translate (Vector3 (14 :: Float) 0 0)
+         vertex   (Vertex2 0 0 :: Vertex2 GLfloat)
+     translate (Vector3 14 0 0 :: Vector3 GLfloat)
 
 
 -- generates a displaylist for displaying large digits
@@ -64,15 +64,15 @@ genBigNumList (tex,list) = do
    defineList list Compile $ do
       textureBinding Texture2D $= tex
       unsafeRenderPrimitive Quads $ do
-         texCoord (TexCoord2  0 ( 1 :: Float))
-         vertex   (Vertex2    0 ( 0 :: Float))
-         texCoord (TexCoord2  0 ( 0 :: Float))
-         vertex   (Vertex2    0 (45 :: Float))
-         texCoord (TexCoord2  1 ( 0 :: Float))
-         vertex   (Vertex2   30 (45 :: Float))
-         texCoord (TexCoord2  1 ( 1 :: Float))
-         vertex   (Vertex2   30 ( 0 :: Float))
-      translate   (Vector3 (32 :: Float) 0 0)
+         texCoord (TexCoord2  0  1 :: TexCoord2 GLfloat)
+         vertex   (Vertex2    0  0 :: Vertex2 GLfloat)
+         texCoord (TexCoord2  0  0 :: TexCoord2 GLfloat)
+         vertex   (Vertex2    0 45 :: Vertex2 GLfloat)
+         texCoord (TexCoord2  1  0 :: TexCoord2 GLfloat)
+         vertex   (Vertex2   30 45 :: Vertex2 GLfloat)
+         texCoord (TexCoord2  1  1 :: TexCoord2 GLfloat)
+         vertex   (Vertex2   30  0 :: Vertex2 GLfloat)
+      translate   (Vector3 32 0 0 :: Vector3 GLfloat)
 
 
 -- renders a large digit
@@ -80,10 +80,10 @@ renderNum :: Float -> Float -> DisplayList -> Int -> IO()
 renderNum x y (DisplayList base) n = unsafePreservingMatrix $ do
    loadIdentity
    texture Texture2D $= Enabled
-   alphaFunc $= Just (Greater,0.1:: Float)
+   alphaFunc $= Just (Greater,0.1)
    let list = map toDList (show n)
    unsafePreservingMatrix $ do
-      translate (Vector3 x y (0::Float))
+      translate (Vector3 (realToFrac x) (realToFrac y) 0 :: Vector3 GLfloat)
       mapM_ callList list
    alphaFunc $= Nothing
    texture Texture2D $= Disabled
@@ -100,9 +100,9 @@ printFonts' x y (fontTex,DisplayList _) st string =
       loadIdentity
       texture Texture2D $= Enabled
       textureBinding Texture2D $= fontTex
-      translate (Vector3 x y (0::Float))
+      translate (Vector3 (realToFrac x) (realToFrac y) 0 :: Vector3 GLfloat)
       let lists = map (toDisplayList (128*(fromIntegral st))) string
-      alphaFunc $= Just (Greater,0.1:: Float)
+      alphaFunc $= Just (Greater,0.1)
       mapM_ callList lists --(map DisplayList [17..(32:: GLuint)])
       alphaFunc $= Nothing
       texture Texture2D $= Disabled
@@ -129,17 +129,17 @@ renderCrosshair texs = do
    textureBinding Texture2D $= crosshairTex
    unsafePreservingMatrix $ do
       loadIdentity
-      translate (Vector3 304 224 (0::Float))
-      alphaFunc $= Just (Greater,0.1:: Float)
+      translate (Vector3 304 224 0 :: Vector3 GLfloat)
+      alphaFunc $= Just (Greater,0.1)
       unsafeRenderPrimitive Quads $ do
-         texCoord (TexCoord2 0 (1 :: Float))
-         vertex   (Vertex2 0 (0 :: Float))
-         texCoord (TexCoord2 0 (0 :: Float))
-         vertex   (Vertex2 0 (32 :: Float))
-         texCoord (TexCoord2 1 (0 :: Float))
-         vertex   (Vertex2 32 (32 :: Float))
-         texCoord (TexCoord2 1 (1 :: Float))
-         vertex   (Vertex2 32 (0 :: Float))
+         texCoord (TexCoord2 0 1 :: TexCoord2 GLfloat)
+         vertex   (Vertex2 0 0 :: Vertex2 GLfloat)
+         texCoord (TexCoord2 0 0 :: TexCoord2 GLfloat)
+         vertex   (Vertex2 0 32 :: Vertex2 GLfloat)
+         texCoord (TexCoord2 1 0 :: TexCoord2 GLfloat)
+         vertex   (Vertex2 32 32 :: Vertex2 GLfloat)
+         texCoord (TexCoord2 1 1 :: TexCoord2 GLfloat)
+         vertex   (Vertex2 32 0 :: Vertex2 GLfloat)
       alphaFunc $= Nothing
    texture Texture2D $= Disabled
 

@@ -10,6 +10,7 @@ import Matrix
 import qualified AFRPGeometry as P
 import PhysicalDimensions
 import Graphics.UI.GLUT
+import Control.Applicative
 
 data Camera = Camera {cpos      :: !(Double,Double,Double),
                       viewPos   :: !(Double,Double,Double),
@@ -26,12 +27,12 @@ initCamera  (a,b,c) (d,e,f) (g,h,i) =
 
 -- convert from a tuple of doubles to an OpenGL vector
 toVector3 :: Vec3 -> Vector3 GLdouble
-toVector3 (a,b,c) =  Vector3 a b c
+toVector3 (a,b,c) =  realToFrac <$> Vector3 a b c
 
 
 -- convert from a tuple of doubles to an OpenGL vertex
 toVertex3 :: Vec3 -> Vertex3 GLdouble
-toVertex3 (a,b,c) =  Vertex3 a b c
+toVertex3 (a,b,c) =  realToFrac <$> Vertex3 a b c
 
 
 -- gets OpenGL to assume the view of the camera

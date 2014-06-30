@@ -9,7 +9,8 @@ module Render (
 
 import MD3
 import Object
-import Graphics.Rendering.OpenGL
+import Graphics.Rendering.OpenGL hiding (vertex, rotate)
+import qualified Graphics.Rendering.OpenGL as GRO
 import Data.IORef
 import Data.Maybe
 import Camera
@@ -19,6 +20,21 @@ import BSP
 import Data.HashTable
 import Visibility
 import TextureFonts
+import Control.Applicative
+
+-- The redefinitions of matrix transform functions here are needed because
+-- putting type specifications in every line they're used is not a sane
+-- alternative. The problem stems from the fact that most of the Haskell code
+-- maintains Floats and Doubles and the type system cannot automatically
+-- resolve conversions made by fromIntegral or realToFrac because they take
+-- place within monadic function calls.
+vertex :: Vertex3 Double -> IO ()
+vertex v = GRO.vertex (realToFrac <$> v :: Vertex3 GLdouble)
+
+rotate :: Double -> Vector3 Double -> IO ()
+rotate angle v = GRO.rotate (realToFrac angle :: GLdouble) (realToFrac <$> v :: Vector3 GLdouble)
+-- TODO: other redefinitions should follow, wherever repeated type specifiers are used in this module.
+
 
 data GameData = GameData {
                             gamemap        :: IORef(BSPMap),
@@ -134,24 +150,23 @@ renderGun cam mdels = do
           clear [DepthBuffer ]
 
           --translate and rotate the gun so it is aligned with players view vector
-          translate (Vector3 x (y+30) (z :: Double))
+          translate (Vector3 (realToFrac x) (realToFrac (y+30)) (realToFrac z) :: Vector3 GLfloat)
           let angle2 =
                     acos $ dotProd (normalise $ vectorSub (vx,0,vz) (x,0,z)) (1,0,0)
           case (vz > z ) of
-                False -> rotate ((angle2*180/pi) :: GLdouble) (Vector3 0 1 0)
-                True  -> rotate ((360 - (angle2*180/pi)) :: GLdouble) (Vector3 0 1 0)
+                False -> rotate (angle2*180/pi) (Vector3 0 1 0)
+                True  -> rotate (360 - (angle2*180/pi)) (Vector3 0 1 0)
           let angle1 =
                     acos $ dotProd (normalise $ vectorSub (vx,vy,vz) (x,y,z)) (0,1,0)
-          rotate (90-(angle1*180/pi) :: GLdouble) (Vector3 0 0 1)
-          rotate (-90 :: Double) (Vector3 1 0 0)
-          translate (Vector3 (4.8) (-9.5) ((-20) :: Double))
+          rotate (90-(angle1*180/pi)) (Vector3 0 0 1)
+          rotate (-90) (Vector3 1 0 0)
+          translate (Vector3 (realToFrac 4.8) (realToFrac $ -9.5) (realToFrac $ -20) :: Vector3 GLfloat)
           scale 2 2 (2 :: GLfloat)
 
           --setup the animation state and drw the model
           writeIORef (auxFunc2 (modelRef weapon)) Nothing
           drawModel (modelRef weapon,lowerState weapon)
    depthFunc              $= Just Always
-
 
 renderRay :: ObsObjState -> IO()
 renderRay (OOSRay {rayStart = (x1,y1,z1),
@@ -161,23 +176,23 @@ renderRay (OOSRay {rayStart = (x1,y1,z1),
     color $ Color4 255 0 0 (255 :: GLubyte)
     depthFunc              $= Just Always
     unsafeRenderPrimitive Quads $ do
-          vertex (Vertex3 x2 (y2+0.3) z2)
-          vertex (Vertex3 x2 (y2-0.3) z2)
-          vertex (Vertex3 x1 (y1-0.3) z1)
-          vertex (Vertex3 x1 (y1+0.3) z1)
+          vertex $ Vertex3 x2 (y2+0.3) z2
+          vertex $ Vertex3 x2 (y2-0.3) z2
+          vertex $ Vertex3 x1 (y1-0.3) z1
+          vertex $ Vertex3 x1 (y1+0.3) z1
     color $ Color4 255 255 255 (255 :: GLubyte)
     unsafeRenderPrimitive Quads $ do
-          vertex (Vertex3 x2 (y2+0.12) z2)
-          vertex (Vertex3 x2 (y2-0.12) z2)
-          vertex (Vertex3 x1 (y1-0.12) z1)
-          vertex (Vertex3 x1 (y1+0.12) z1)
+          vertex $ Vertex3 x2 (y2+0.12) z2
+          vertex $ Vertex3 x2 (y2-0.12) z2
+          vertex $ Vertex3 x1 (y1-0.12) z1
+          vertex $ Vertex3 x1 (y1+0.12) z1
     depthFunc              $= Just Less
     cullFace               $= Just Front
     case cl of
           True -> do
                 cullFace                    $= Nothing
                 unsafePreservingMatrix $ do
-                   translate (Vector3 x2 y2 z2)
+                   translate (Vector3 (realToFrac x2 :: GLfloat) (realToFrac y2) (realToFrac z2))
                    renderQuadric
                          (QuadricStyle Nothing NoTextureCoordinates Outside FillStyle)
                             (Sphere 3 12 12)
@@ -189,7 +204,7 @@ renderRay (OOSRay {rayStart = (x1,y1,z1),
 renderProjectile :: ObsObjState -> IO()
 renderProjectile (OOSProjectile {projectileOldPos = (x,y,z)}) = do
    unsafePreservingMatrix $ do
-         translate (Vector3 x y z)
+         translate (Vector3 (realToFrac x :: GLfloat) (realToFrac y) (realToFrac z))
          depthFunc              $= Just Always
          cullFace               $= Nothing
          color $ Color4 0 0 80 (255 :: GLubyte)
@@ -240,22 +255,22 @@ renderEnemy camRef mdels frust bspmap (OOSAICube {oosOldCubePos = (x,y,z),
                         _ -> do
                            unsafePreservingMatrix $ do
                                  lineWidth $= 5.0
-                                 translate (Vector3 x y z)
+                                 translate (Vector3 (realToFrac x) (realToFrac y) (realToFrac z) :: Vector3 GLdouble)
                                  Just model <- Data.HashTable.lookup mdels name
                                  writeIORef (pitch model)
                                     (Just $ do
                                                     cullFace $=  Nothing
                                                     cullFace $=  Just Front
-                                                    (rotate p (Vector3 0 1 0)))
+                                                    rotate p (Vector3 0 1 0))
                                  writeIORef (lowerState model)  la
                                  writeIORef (upperState model)  ua
-                                 currentColor $= Color4 (f*60) (f*60) (f*60) (1 :: Float)
+                                 currentColor $= (Color4 (realToFrac f*60) (realToFrac f*60) (realToFrac f*60) 1 :: Color4 GLfloat)
                                  unsafePreservingMatrix $ do
-                                    rotate ((-90) :: GLdouble) (Vector3 1 0 0)
-                                    rotate (angle) (Vector3 0 0 1)
-                                    translate (Vector3 (-10) 0 (-10 :: Double))
+                                    rotate (-90) (Vector3 1 0 0)
+                                    rotate angle (Vector3 0 0 1)
+                                    translate (Vector3 (-10) 0 (-10 :: GLdouble))
                                     scale 1.5 1.5 (1.5 :: GLfloat)
                                     drawModel (modelRef model,lowerState model)
-                                 currentColor $= Color4 1 1 1 (1 :: Float)
+                                 currentColor $= Color4 1 1 1 (1 :: GLfloat)
                                  writeIORef (pitch model) Nothing
             False -> return ()

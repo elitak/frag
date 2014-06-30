@@ -177,10 +177,10 @@ bezier tes cp1 cp2 cp3 i = add7 (add7 d1 d2) d3
 generateIndices :: Int -> IO (Ptr GLsizei, Ptr (Ptr GLint))
 generateIndices tess = do
    indexArray <- newArray (0,((tess*(tess+1)*2)-1)) 0
-   let pt1 = [ ((((row*(tess+1))+point)*2)+1, fromIntegral ((row*(tess+1))+point)) |
+   let pt1 = [ ((((row*(tess+1))+point)*2)+1, row*(tess+1)+point) |
                          row<-[0..(tess-1)],
                          point<-[0..tess]]
-   let pt2 = [ ((((row*(tess+1))+point)*2), fromIntegral (((row+1)*(tess+1))+point)) |
+   let pt2 = [ ((((row*(tess+1))+point)*2), (row+1)*(tess+1)+point) |
                          row<-[0..(tess-1)],
                          point<-[0..tess]]
    mapM_ (writeIndices indexArray) pt1
@@ -197,5 +197,5 @@ generateIndices tess = do
 
 
 -- writes the indices to memory
-writeIndices :: IOUArray Int GLint -> (Int,GLint) -> IO ()
+writeIndices :: IOUArray Int Int -> (Int, Int) -> IO ()
 writeIndices indcs (pos,content) = writeArray indcs pos content

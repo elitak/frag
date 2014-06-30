@@ -8,7 +8,8 @@ converions between quaternions and matrices
 
 module Quaternion where
 
-import Graphics.UI.GLUT -- (GLmatrix, GLfloat, newMatrix, ColumnMajor)
+import Graphics.UI.GLUT
+import Control.Applicative
 
 type Quaternion = (Float,Float,Float,Float)
 
@@ -19,10 +20,10 @@ type Matrix3x3 = ((Float,Float,Float),
 -- converts from quaternion to matrix
 quat2Mat :: Quaternion -> (Float,Float,Float) -> IO (GLmatrix GLfloat)
 quat2Mat (x,y,z,w) (t1,t2,t3)=
-   newMatrix ColumnMajor [(r00 :: GLfloat),r01,r02,r03,
-                          r10,r11,r12,r13,
-                          r20,r21,r22,r23,
-                          r30,r31,r32,r33]
+   newMatrix ColumnMajor $ realToFrac <$> [r00,r01,r02,r03,
+                                           r10,r11,r12,r13,
+                                           r20,r21,r22,r23,
+                                           r30,r31,r32,r33]
    where r00 = 1 - (2*((y*y)+(z*z)))
          r01 = 2 * ((x*y)-(w*z))
          r02 = 2 * ((x*z)+(w*y))

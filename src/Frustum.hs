@@ -9,6 +9,9 @@ module Frustum where
 
 import Graphics.UI.GLUT
 import Graphics.Rendering.OpenGL.GL.CoordTrans
+--import Foreign.C.Types (CDouble(CDouble))
+import Prelude hiding (concat)
+import Data.Foldable (concat)
 
 
 type FPlane =  (Double, Double, Double, Double)
@@ -30,11 +33,14 @@ getFrustum = do
     m10,m11,m12,m13,
     m20,m21,m22,m23,
     m30,m31,m32,m33] <- getMatrixComponents ColumnMajor mvMatrix
+    --- XXX get this to work rather than the spam below. getMatricComponents :: MatrixOrder -> m c -> IO [c]
+    --m30,m31,m32,m33] <- map (realToFrac) $ concat ( getMatrixComponents ColumnMajor mvMatrix)
    pjMatrix <- get (matrix (Just (Projection))) :: IO (GLmatrix GLdouble)
    [p00,p01,p02,p03,
     p10,p11,p12,p13,
     p20,p21,p22,p23,
     p30,p31,p32,p33] <- getMatrixComponents ColumnMajor pjMatrix
+    --p30,p31,p32,p33] <- map (realToFrac) $ concat ( getMatrixComponents ColumnMajor pjMatrix)
 
    let clip00 = m00*p00 + m01*p10 + m02*p20 + m03*p30
    let clip01 = m00*p01 + m01*p11 + m02*p21 + m03*p31
@@ -56,35 +62,35 @@ getFrustum = do
    let clip32 = m30*p02 + m31*p12 + m32*p22 + m33*p32
    let clip33 = m30*p03 + m31*p13 + m32*p23 + m33*p33
 
-   let rightX = clip03 - clip00
-   let rightY = clip13 - clip10
-   let rightZ = clip23 - clip20
-   let rightD = clip33 - clip30
+   let rightX = realToFrac $ clip03 - clip00
+   let rightY = realToFrac $ clip13 - clip10
+   let rightZ = realToFrac $ clip23 - clip20
+   let rightD = realToFrac $ clip33 - clip30
 
-   let leftX  = clip03 + clip00
-   let leftY  = clip13 + clip10
-   let leftZ  = clip23 + clip20
-   let leftD  = clip33 + clip30
+   let leftX  = realToFrac $ clip03 + clip00
+   let leftY  = realToFrac $ clip13 + clip10
+   let leftZ  = realToFrac $ clip23 + clip20
+   let leftD  = realToFrac $ clip33 + clip30
 
-   let bottomX  = clip03 + clip01
-   let bottomY  = clip13 + clip11
-   let bottomZ  = clip23 + clip21
-   let bottomD  = clip33 + clip31
+   let bottomX  = realToFrac $ clip03 + clip01
+   let bottomY  = realToFrac $ clip13 + clip11
+   let bottomZ  = realToFrac $ clip23 + clip21
+   let bottomD  = realToFrac $ clip33 + clip31
 
-   let topX  = clip03 - clip01
-   let topY  = clip13 - clip11
-   let topZ  = clip23 - clip21
-   let topD  = clip33 - clip31
+   let topX  = realToFrac $ clip03 - clip01
+   let topY  = realToFrac $ clip13 - clip11
+   let topZ  = realToFrac $ clip23 - clip21
+   let topD  = realToFrac $ clip33 - clip31
 
-   let backX  = clip03 - clip02
-   let backY  = clip13 - clip12
-   let backZ  = clip23 - clip22
-   let backD  = clip33 - clip32
+   let backX  = realToFrac $ clip03 - clip02
+   let backY  = realToFrac $ clip13 - clip12
+   let backZ  = realToFrac $ clip23 - clip22
+   let backD  = realToFrac $ clip33 - clip32
 
-   let frontX  = clip03 + clip02
-   let frontY  = clip13 + clip12
-   let frontZ  = clip23 + clip22
-   let frontD  = clip33 + clip32
+   let frontX  = realToFrac $ clip03 + clip02
+   let frontY  = realToFrac $ clip13 + clip12
+   let frontZ  = realToFrac $ clip23 + clip22
+   let frontD  = realToFrac $ clip33 + clip32
 
    rightPlane  <- normalisePlane (rightX ,rightY ,rightZ ,rightD)
    leftPlane   <- normalisePlane (leftX  ,leftY  ,leftZ  ,leftD)

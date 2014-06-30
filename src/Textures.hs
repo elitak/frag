@@ -10,6 +10,8 @@ import Graphics.UI.GLUT
 import TGA (readTga)
 import Data.Word (Word8)
 import Foreign.Marshal.Alloc (free)
+import Control.Exception (catch)
+import Control.Exception.Base (SomeException)
 
 
 -- read a list of images and returns a list of textures
@@ -32,8 +34,9 @@ getAndCreateTexture fileName = do
 
 -- read the image data
 readImageC :: String -> IO (Maybe (Size, PixelData Word8))
-readImageC path = catch (readTga path) (\_ -> do print ("missing texture: "++path)
-                                                 return Nothing)
+readImageC path = catch (readTga path) (\e -> let _ = (e :: SomeException) in do 
+                                              putStrLn $ "missing texture: "++path
+                                              return Nothing)
 
 
 -- creates the texture
